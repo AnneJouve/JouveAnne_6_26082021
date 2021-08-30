@@ -1,8 +1,11 @@
 const express = require('express');//Importation d'Express
 const bodyParser = require('body-parser');//Importation de body-parser
 const mongoose = require('mongoose');
+const Sauce = require('./models/Sauce');
+const path = require('path');
 
 /*const saucesRoutes = require('./routes/sauces');*/
+const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
 
 mongoose.connect('mongodb+srv://new-user_123:Rwsq5K3o6THK9XTT@cluster0.xy9wy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
@@ -21,9 +24,9 @@ app.use((req, res, next) => {//Fonction utilisée pour tout type de requête
   });
 
 app.use(bodyParser.json());
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
-/*app.use('/api/sauces', saucesRoutes);*/
+app.use('/api/sauces', saucesRoutes);
 app.use('/api/auth', userRoutes);
 
 module.exports = app;//Exportation de la constante pour pouvoir y accéder depuis les autres fichiers
