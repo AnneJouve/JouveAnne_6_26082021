@@ -49,44 +49,31 @@ exports.getAllSauces = (req, res, next) => {
 };
 
 exports.likeSauce = (req, res, next) => {
-    switch (req.body.like) {
-        case 0:
-            Sauce.findOne({_id: req.params.id})
-                .then((sauce) => {
-                    if (sauce.usersLiked.include(req.body.userId)) {
-                        Sauce.updateOne({_id: req.params.id}, {
-                            $inc: { likes: -1 },
-                            $pull: { usersLiked: req.body.userId },
-                        })
-                        .then(() => res.status(201).json({ message: 'Avis enregistré' }))
-                        .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
-                    }
-                    if (sauce.usersDisliked.include(req.body.userId)) {
-                        Sauce.updateOne({_id: req.params.id}, {
-                            $inc: { dislikes: -1 },
-                            $pull: { usersDisliked: req.body.userId },
-                        })
-                        .then(() => res.status(201).json({ message: 'Avis enregistré' }))
-                        .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
-                    }
-                })
-                .catch(error => res.status(404).json({ error }));
-        break;
-        case 1:
-            Sauce.updateOne({_id: req.params.id}, {
-                $inc: { likes: 1 },
-                $push: { usersLiked: req.body.userId },
-            })
-                .then(() => res.status(201).json({ message: 'Like enregistré' }))
-                .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
-        break;
-        case -1:
-            Sauce.updateOne({_id: req.params.id}, {
-                $inc: { dislikes: 1 },
-                $push: { usersDisliked: req.body.userId },
-            })
-                .then(() => res.status(201).json({ message: 'Dislike enregistré' }))
-                .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
-        default: console.log('Requête erronée');
-    }
+   Sauce.findOne({_id: req.params.id})
+    .then(sauce => {
+        switch (req.body.like) {
+            case 0:
+                if (sauce.usersLiked.includes(req.body.userId)) {
+                    sauce.likes -= 1
+                    sauce.usersLiked = sauce.usersLiked.filter(user => user != req.body.userId)
+                } else if (sauce.usersDisliked.includes(req.body.userId)) {
+                    sauce.dislikes -= 1
+                    sauce.usersDisliked = sauce.usersDisliked.filter(user => user != req.body.userId)
+                }
+                break
+            case 1:
+                sauce.likes += 1
+                sauce.usersLiked.push(req.body.userId)
+                break
+            case -1:
+                sauce.dislikes += 1
+                sauce.usersDisliked.push(req.body.userId)
+                break
+            default: console.log('Requête erronée');
+        }
+        sauce.save()
+        .then(() => res.status(201).json({ message: 'Sauce créée' }))
+        .catch(error => res.status(400).json({ error }));
+    })
+    .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
 };

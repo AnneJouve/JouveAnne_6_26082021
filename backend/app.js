@@ -1,4 +1,5 @@
 const express = require('express');//Importation d'Express
+const helmet = require('helmet');
 const bodyParser = require('body-parser');//Importation de body-parser
 const mongoose = require('mongoose');
 const Sauce = require('./models/Sauce');
@@ -15,6 +16,7 @@ mongoose.connect('mongodb+srv://new-user_123:Rwsq5K3o6THK9XTT@cluster0.xy9wy.mon
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 const app = express();//Appelle la méthode Express et permet de créer une application Express
+app.use(helmet());
 
 app.use((req, res, next) => {//Fonction utilisée pour tout type de requête
     res.setHeader('Access-Control-Allow-Origin', '*');
