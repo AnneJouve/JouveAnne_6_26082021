@@ -26,7 +26,7 @@ exports.modifySauce = (req, res, next) => {
     } : { ...req.body }; 
     Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id })
     .then(() => res.status(201).json({ message: 'Sauce modifiée' }))
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
 };
 
 exports.deleteSauce = (req, res, next) => {
@@ -46,4 +46,47 @@ exports.getAllSauces = (req, res, next) => {
     Sauce.find()
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
+};
+
+exports.likeSauce = (req, res, next) => {
+    switch (req.body.like) {
+        case 0:
+            Sauce.findOne({_id: req.params.id})
+                .then((sauce) => {
+                    if (sauce.usersLiked.include(req.body.userId)) {
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: { likes: -1 },
+                            $pull: { usersLiked: req.body.userId },
+                        })
+                        .then(() => res.status(201).json({ message: 'Avis enregistré' }))
+                        .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
+                    }
+                    if (sauce.usersDisliked.include(req.body.userId)) {
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: { dislikes: -1 },
+                            $pull: { usersDisliked: req.body.userId },
+                        })
+                        .then(() => res.status(201).json({ message: 'Avis enregistré' }))
+                        .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
+                    }
+                })
+                .catch(error => res.status(404).json({ error }));
+        break;
+        case 1:
+            Sauce.updateOne({_id: req.params.id}, {
+                $inc: { likes: 1 },
+                $push: { usersLiked: req.body.userId },
+            })
+                .then(() => res.status(201).json({ message: 'Like enregistré' }))
+                .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
+        break;
+        case -1:
+            Sauce.updateOne({_id: req.params.id}, {
+                $inc: { dislikes: 1 },
+                $push: { usersDisliked: req.body.userId },
+            })
+                .then(() => res.status(201).json({ message: 'Dislike enregistré' }))
+                .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
+        default: console.log('Requête erronée');
+    }
 };

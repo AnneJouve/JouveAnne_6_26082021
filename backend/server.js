@@ -1,5 +1,7 @@
 const http = require('http');//Importation du package http de Node
 const app = require('./app');//Importation d'Express
+const cors = require('cors');
+app.use(cors());
 
 const normalizePort = val => {
   const port = parseInt(val, 10);
