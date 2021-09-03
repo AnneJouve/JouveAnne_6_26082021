@@ -1,6 +1,7 @@
+//Imports
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
-
+//Logique métier
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce);
     const sauce = new Sauce({
@@ -11,13 +12,11 @@ exports.createSauce = (req, res, next) => {
     .then(() => res.status(201).json({ message: 'Sauce créée' }))
     .catch(error => res.status(400).json({ error }));
 };
-
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(404).json({ error }));
 };
-
 exports.modifySauce = (req, res, next) => {
     const sauceObject = req.file ?
     {
@@ -28,7 +27,6 @@ exports.modifySauce = (req, res, next) => {
     .then(() => res.status(201).json({ message: 'Sauce modifiée' }))
     .catch(error => res.status(403).json({ message: '403:unauthorized request' }));
 };
-
 exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
@@ -41,13 +39,11 @@ exports.deleteSauce = (req, res, next) => {
         })
         .catch(error => res.status(500).json({ error }));
 };
-
 exports.getAllSauces = (req, res, next) => {
     Sauce.find()
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
 };
-
 exports.likeSauce = (req, res, next) => {
    Sauce.findOne({_id: req.params.id})
     .then(sauce => {
